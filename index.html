@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en" manifest="dof.manifest">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>DepthOfField</title>
+	<meta name="author" content="Daniel Stockman">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="viewport" content="user-scalable=no, width=device-width">
+	<style type="text/css" media="screen">
+	body {
+		margin: 0;
+		padding: 0;
+		width: 320px;
+		font-family: Helvetica, sans-serif;
+		font-size: 17px;
+		-webkit-text-size-adjust: none;
+		background-color: white;
+	}
+	#container {
+		margin: 0;
+		padding-bottom: 10px;
+		background-color: #c5ccd3;
+		border: 1px solid #c5ccd3; /* workaround for a WebKit rendering bug */
+	}
+	h1 {
+		font-size: 17px;
+		color: #4c566c;
+		margin: 10px 10px 8px 20px;
+		padding: 0;
+	}
+	ul {
+		margin: 0 10px;
+		padding: 0;
+		width: 296px;
+		background-color: white;
+		-webkit-border-radius: 8px;
+		border: 1px solid #d9d9d9;
+	}
+	li {
+		font-weight: bold;
+		list-style-type: none;
+		border-bottom: 1px solid #d9d9d9;
+		padding: 10px;
+		text-align: right;
+		position: relative;
+	}
+	label {
+		position: absolute;
+		left: 20px;
+		top: 17px;
+	}
+	.secondary {
+		font-weight: normal;
+	}
+	.secondary p {
+		margin: 0.5em 0 0;
+		padding: 0;
+		text-align: center;
+	}
+	.secondary label {
+		position: static;
+	}
+
+	input, select, button {
+		font-size: 1em;
+	}
+	input {
+		text-align: right;
+	}
+	.center {
+		text-align: center;
+	}
+
+	#calculate {
+		display: block;
+		margin: 0 auto;
+	}
+	input[type=text][readonly] {
+		border-width: 0 0 1px 0;
+		-webkit-border-radius: 0;
+		-webkit-appearance: none; /* gets rid of top inner shadow */
+	}
+	</style>
+	<script type="text/javascript">
+(function(){
+	function getSelectedValue(sel) {
+		return sel.options[sel.selectedIndex].value;
+	}
+	function fixedMeters(n) {
+		return (n / 1000).toFixed(2) + " m";
+	}
+	function roundFixedMeters(n) {
+		return fixedMeters(Math.round(n));
+	}
+	function doField(e) {
+		var f = document.forms[0];
+		var distance = f.distance.value * 1000,
+			CoC      = getSelectedValue(f.format),
+			aperture = getSelectedValue(f.aperture),
+			focal    = getSelectedValue(f.focal);
+
+		if (isNaN(distance)) {
+			alert('Please enter a numerical value for subject distance');
+			f.distance.focus();
+			f.distance.select();
+		}
+		else {
+			var hyperFocal = (focal * focal) / (aperture * CoC);
+			f.hyperFocal.value = roundFixedMeters(hyperFocal);
+
+			var dofNear = (hyperFocal * distance) / (hyperFocal + (distance - focal));
+			f.dofNear.value = roundFixedMeters(dofNear);
+
+			var dofFar  = (hyperFocal * distance) / (hyperFocal - (distance - focal));
+			if (dofFar < 0) {
+				f.dofFar.value = "Infinity";
+			}
+			else {
+				f.dofFar.value = roundFixedMeters(dofFar);
+			}
+
+			var dofTotal = Math.round(dofFar - dofNear);
+			if (dofTotal < 0) {
+				f.dofTotal.value = "Infinite";
+			}
+			else {
+				if (dofTotal >= 0 && dofTotal < 0.001) {
+					f.dofTotal.value = ">1 mm ";
+				}
+				else {
+					f.dofTotal.value = fixedMeters(dofTotal);
+				}
+			}
+		}
+	}
+
+	window.addEventListener('load', function () {
+		var btn = document.getElementById('calculate');
+		btn.addEventListener('click', doField);
+	});
+})();
+	</script>
+</head>
+<body>
+<div id="container">
+	<form method="get" name="form" id="dof_form" onsubmit="return false;">
+
+		<h1>Depth of Field Calculator</h1>
+		<ul id="parameters">
+			<li>
+				<label for="format">Sensor</label>
+				<select id="format" name="format">
+					<option value="0.00381">PoS - 1/3.6"</option>
+					<option value="0.00433">PoS - 1/3.2"</option>
+					<option value="0.00458">PoS - 1/3"</option>
+					<option value="0.00513">PoS - 1/2.7"</option>
+					<option value="0.00548">PoS - 1/2.5"</option>
+					<option value="0.00610">PoS - 1/2"</option>
+					<option value="0.00686">PoS - 1/1.8"</option>
+					<option value="0.00825">PoS - 2/3"</option>
+					<option value="0.0122">DSLR - 1"</option>
+					<option value="0.0172">DSLR - 4/3"</option>
+					<option value="0.0217">DSLR - 1.8"</option>
+					<option value="0.0217" selected="selected">DSLR - Nikon DX</option>
+					<option value="0.0206">DSLR - FLM 1.6 X</option>
+					<option value="0.0220">DSLR - FLM 1.5 X</option>
+					<option value="0.0254">DSLR - FLM 1.3 X</option>
+					<option value="0.033">film - 35 mm</option>
+					<option value="0.025">film - APS</option>
+					<option value="0.0534">film - 6 x 4.5 cm</option>
+					<option value="0.06">film - 6 x 6 cm</option>
+					<option value="0.065">film - 6 x 7 cm</option>
+					<option value="0.077">film - 6 x 9 cm</option>
+					<option value="0.095">film - 6 x 12 cm</option>
+					<option value="0.135">film - 6 x 17 cm</option>
+					<option value="0.0602">film - 2 1/4" ^2</option>
+					<option value="0.15">film - 4" x 5"</option>
+					<option value="0.0167">film - 5" x 7"</option>
+					<option value="0.3">film - 8" x 10"</option>
+				</select>
+			</li>
+			<li>
+				<label for="focal">Focal Length</label>
+				<!-- janky non-blocking spaces simulate right alignment of currently selected value -->
+				<select id="focal" name="focal">
+					<option value="6">&nbsp;&nbsp;&nbsp;&nbsp;6 mm</option>
+					<option value="7">&nbsp;&nbsp;&nbsp;&nbsp;7 mm</option>
+					<option value="8">&nbsp;&nbsp;&nbsp;&nbsp;8 mm</option>
+					<option value="9">&nbsp;&nbsp;&nbsp;&nbsp;9 mm</option>
+					<option value="10">&nbsp;&nbsp;10 mm</option>
+					<option value="11">&nbsp;&nbsp;11 mm</option>
+					<option value="12">&nbsp;&nbsp;12 mm</option>
+					<option value="13">&nbsp;&nbsp;13 mm</option>
+					<option value="14">&nbsp;&nbsp;14 mm</option>
+					<option value="15">&nbsp;&nbsp;15 mm</option>
+					<option value="16">&nbsp;&nbsp;16 mm</option>
+					<option value="17">&nbsp;&nbsp;17 mm</option>
+					<option value="20">&nbsp;&nbsp;20 mm</option>
+					<option value="24">&nbsp;&nbsp;24 mm</option>
+					<option value="28">&nbsp;&nbsp;28 mm</option>
+					<option value="35">&nbsp;&nbsp;35 mm</option>
+					<option value="50" selected="selected">&nbsp;&nbsp;50 mm</option>
+					<option value="70">&nbsp;&nbsp;70 mm</option>
+					<option value="80">&nbsp;&nbsp;80 mm</option>
+					<option value="100">100 mm</option>
+					<option value="135">135 mm</option>
+					<option value="150">150 mm</option>
+					<option value="200">200 mm</option>
+					<option value="210">210 mm</option>
+					<option value="300">300 mm</option>
+					<option value="350">350 mm</option>
+					<option value="400">400 mm</option>
+					<option value="600">600 mm</option>
+					<option value="900">900 mm</option>
+				</select>
+			</li>
+			<li>
+				<label for="aperture">Selected Aperture</label>
+				<select id="aperture" name="aperture">
+					<option value="1.4">F 1.4</option>
+					<option value="1.8">F 1.8</option>
+					<option value="2">F 2</option>
+					<option value="2.8">F 2.8</option>
+					<option value="4">F 4</option>
+					<option value="5.6" selected="selected">F 5.6</option>
+					<option value="8">F 8</option>
+					<option value="11">F 11</option>
+					<option value="16">F 16</option>
+					<option value="22">F 22</option>
+					<option value="32">F 32</option>
+					<option value="45">F 45</option>
+					<option value="64">F 64</option>
+				</select>
+			</li>
+			<li>
+				<label for="distance">Distance <span class="secondary">(in meters)</span></label>
+				<input type="text" value="" size="6" id="distance" name="distance" class="center" autocorrect="off" autocapitalize="off">
+			</li>
+			<li>
+				<button id="calculate">Calculate</button>
+			</li>
+		</ul>
+
+		<h1>Results</h1>
+		<ul id="results">
+			<li>
+				<label for="dofTotal">Total depth of field</label>
+				<input type="text" value="" size="7" readonly="readonly" id="dofTotal" name="dofTotal">
+			</li>
+			<li>
+				<label for="hyperFocal" class="secondary">Hyperfocal Distance</label>
+				<input type="text" value="" size="7" readonly="readonly" id="hyperFocal" name="hyperFocal">
+			</li>
+			<li class="secondary">
+				<label for="dofNear">Near</label>
+					<input type="text" value="" size="7" readonly="readonly" id="dofNear" name="dofNear">
+				<label for="dofFar">&nbsp;&nbsp;Far</label>
+					<input type="text" value="" size="7" readonly="readonly" id="dofFar"  name="dofFar">
+				<p>Limits of acceptable sharpness</p>
+			</li>
+		</ul>
+	</form>
+</div>
+</body>
+</html>

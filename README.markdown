@@ -14,6 +14,11 @@ Big Thanks To...
  - [Create an Aperture Style Camera Lens Icon][3] tutorial on [VectorTuts+][4].  
    It's such a purty image, I couldn't resist a little hackery in Pixelmator.
 
+ - [Digital Photography Review](http://www.dpreview.com/)'s glossary entry for [Depth of Field](http://www.dpreview.com/learn/?/key=depth+of+field),
+   which contains the inspiration for this whole enterprise, a calculator widget that I wanted to view on my iPhone.
+   The JS was originally written by [Alistair Houston](http://silverlight.co.uk/resources/dof_calc.html), via The JavaScript Source.
+   I merely cleaned up, functionalized, and generally contorted it into modern, idiomatic script.
+
 [1]: http://www.alistapart.com/articles/putyourcontentinmypocketpart2 "Is that a banana in your pocket?"
 [2]: http://furbo.org/ "Please don't sue me, I think you're cool!"
 [3]: http://vector.tutsplus.com/illustration/create-an-aperture-style-camera-lens-icon/ "Please don't sue me"
